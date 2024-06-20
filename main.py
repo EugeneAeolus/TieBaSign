@@ -214,10 +214,17 @@ def send_email(sign_list):
         smtp.connect(HOST)
         smtp.login(FROM, AUTH)
         smtp.sendmail(FROM, TO, msg.as_string())
+    except smtplib.SMTPServerDisconnected:
+        logger.error("SMTP服务器未正确连接，请检查配置")
     except Exception as e:
         logger.error(f"发送邮件失败: {e}")
     finally:
-        smtp.quit()
+        try:
+            smtp.quit()
+        except smtplib.SMTPServerDisconnected:
+            logger.error("SMTP服务器断开连接")
+        except Exception as e:
+            logger.error(f"关闭SMTP连接时出错: {e}")
 
 def main():
     if ('BDUSS' not in ENV):
