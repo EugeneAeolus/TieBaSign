@@ -181,6 +181,10 @@ def send_email(sign_list):
     FROM = ENV['FROM']
     TO = ENV['TO'].split('#')
     AUTH = ENV['AUTH']
+
+    # 调试打印 HOST
+    logger.info(f"Connecting to SMTP server: {HOST}")
+
     length = len(sign_list)
     subject = f"{time.strftime('%Y-%m-%d', time.localtime())} 签到{length}个贴吧"
     body = """
@@ -206,10 +210,14 @@ def send_email(sign_list):
     msg = MIMEText(body, 'html', 'utf-8')
     msg['subject'] = subject
     smtp = smtplib.SMTP()
-    smtp.connect(HOST)
-    smtp.login(FROM, AUTH)
-    smtp.sendmail(FROM, TO, msg.as_string())
-    smtp.quit()
+    try:
+        smtp.connect(HOST)
+        smtp.login(FROM, AUTH)
+        smtp.sendmail(FROM, TO, msg.as_string())
+    except Exception as e:
+        logger.error(f"发送邮件失败: {e}")
+    finally:
+        smtp.quit()
 
 def main():
     if ('BDUSS' not in ENV):
